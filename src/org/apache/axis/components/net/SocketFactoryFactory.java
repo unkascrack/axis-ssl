@@ -87,6 +87,9 @@ public class SocketFactoryFactory {
 		if (PROTOCOL_HTTPS.equalsIgnoreCase(protocol)) {
 			atribute = (String) attributes.get("keystore");
 			if (atribute == null) {
+				atribute = (String) attributes.get("truststore");
+			}
+			if (atribute == null) {
 				atribute = PROTOCOL_HTTPS;
 			}
 		} else if (PROTOCOL_HTTP.equalsIgnoreCase(protocol)) {
