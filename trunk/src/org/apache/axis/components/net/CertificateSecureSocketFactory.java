@@ -87,10 +87,10 @@ public class CertificateSecureSocketFactory extends JSSESocketFactory implements
 			return sslContext;
 		} catch (NoSuchAlgorithmException e) {
 			throw new IOException("Exception trying to load sslContext "
-					+ e.getMessage(), e);
+					+ e.getMessage());
 		} catch (KeyManagementException e) {
 			throw new IOException("Exception trying to load sslContext "
-					+ e.getMessage(), e);
+					+ e.getMessage());
 		}
 	}
 
@@ -159,7 +159,7 @@ public class CertificateSecureSocketFactory extends JSSESocketFactory implements
 			return trustManagers;
 		} catch (Exception e) {
 			throw new IOException("Exception trying to load trustStore "
-					+ trustoreFile + ": " + e.getMessage(), e);
+					+ trustoreFile + ": " + e.getMessage());
 		}
 	}
 
@@ -202,7 +202,7 @@ public class CertificateSecureSocketFactory extends JSSESocketFactory implements
 			throw ioe;
 		} catch (Exception ex) {
 			throw new IOException("Exception trying to load keystore "
-					+ keyFile + ": " + ex.getMessage(), ex);
+					+ keyFile + ": " + ex.getMessage());
 		}
 	}
 
