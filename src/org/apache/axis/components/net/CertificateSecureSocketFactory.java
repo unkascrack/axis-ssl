@@ -124,7 +124,7 @@ public class CertificateSecureSocketFactory extends JSSESocketFactory implements
 			return keyManagers;
 		} catch (Exception e) {
 			throw new IOException("Exception trying to load keyStore "
-					+ keystoreFile + ": " + e.getMessage(), e);
+					+ keystoreFile + ": " + e.getMessage());
 		}
 	}
 
