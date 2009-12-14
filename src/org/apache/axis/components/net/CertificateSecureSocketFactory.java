@@ -53,7 +53,7 @@ public class CertificateSecureSocketFactory extends JSSESocketFactory implements
 		}
 	}
 
-	static final String DEFAULT_PROTOCOL = "SSL";
+	static final String DEFAULT_PROTOCOL = "TLS";
 
 	/**
 	 * Gets a custom SSL Context. This is the main working of this class. The
@@ -71,7 +71,7 @@ public class CertificateSecureSocketFactory extends JSSESocketFactory implements
 	 */
 	protected SSLContext getContext() throws IOException {
 		try {
-			if (attributes == null) {
+			if (attributes == null || (attributes.get("keystore") == null && attributes.get("truststore") == null)) {
 				SSLContext context = SSLContext.getInstance(DEFAULT_PROTOCOL);
 				context.init(null, null, null);
 				return context;

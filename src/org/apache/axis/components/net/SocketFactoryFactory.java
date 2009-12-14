@@ -84,14 +84,11 @@ public class SocketFactoryFactory {
 
 		String atribute = null;
 
+		log.debug("Getting socketfactory for protocol: " + protocol);
+
 		if (PROTOCOL_HTTPS.equalsIgnoreCase(protocol)) {
-			atribute = (String) attributes.get("keystore");
-			if (atribute == null) {
-				atribute = (String) attributes.get("truststore");
-			}
-			if (atribute == null) {
-				atribute = PROTOCOL_HTTPS;
-			}
+			atribute = PROTOCOL_HTTPS + "||" + attributes.get("keystore")
+					+ "||" + (String) attributes.get("truststore");
 		} else if (PROTOCOL_HTTP.equalsIgnoreCase(protocol)) {
 			atribute = PROTOCOL_HTTP;
 		} else {
@@ -103,17 +100,20 @@ public class SocketFactoryFactory {
 		if (theFactory == null) {
 			Object objects[] = new Object[] { attributes };
 
+			log.debug("New socketfactory created for protocol: " + protocol);
+
 			if (PROTOCOL_HTTPS.equalsIgnoreCase(protocol)) {
 				theFactory = (SecureSocketFactory) AxisProperties.newInstance(
 						SecureSocketFactory.class, classes, objects);
-			} else {
+			} else if (PROTOCOL_HTTP.equalsIgnoreCase(protocol)) {
 				theFactory = (SocketFactory) AxisProperties.newInstance(
 						SocketFactory.class, classes, objects);
+			} else {
+				throw new IllegalArgumentException("Unknown Protocol type: "
+						+ protocol);
 			}
 
-			if (theFactory != null) {
-				factories.put(atribute, theFactory);
-			}
+			factories.put(atribute, theFactory);
 		}
 
 		return theFactory;
