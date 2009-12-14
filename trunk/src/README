@@ -2,16 +2,13 @@
 
 // create config
 SSLClientAxisEngineConfig axisConfig = new SSLClientAxisEngineConfig();
-axisConfig.setProtocol("TLS") 						//default SSL
-axisConfig.setAlgorithm("SunX509")					//default KeyManagerFactory.getDefaultAlgorithm()
-													//y TrustManagerFactory.getDefaultAlgorithm()
+axisConfig.setProtocol("SSL") 						//default TLS
 axisConfig.setKeystore("/path/to/clientkey.p12");
 axisConfig.setKeystoreType("PKCS12");
 axisConfig.setKeystorePassword("changeit");
 axisConfig.setTruststore("/path/to/truststore.jks");
 axisConfig.setTruststoreType("JKS");
 axisConfig.setTruststorePassword("changeit");
-axisConfig.initialize();
 
 // initialize service
 URL soapURL = new URL("https://myserver.com/myapp/services/mywebserviceport");

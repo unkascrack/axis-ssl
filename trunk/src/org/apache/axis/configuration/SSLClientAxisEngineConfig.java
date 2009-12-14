@@ -3,17 +3,26 @@
  */
 package org.apache.axis.configuration;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Hashtable;
+
+import javax.xml.namespace.QName;
 
 import org.apache.axis.AxisEngine;
 import org.apache.axis.AxisProperties;
 import org.apache.axis.ConfigurationException;
-import org.apache.axis.EngineConfiguration;
 import org.apache.axis.Handler;
 import org.apache.axis.SimpleTargetedChain;
-import org.apache.axis.encoding.TypeMappingRegistry;
+import org.apache.axis.components.logger.LogFactory;
+import org.apache.axis.deployment.wsdd.WSDDDocument;
 import org.apache.axis.transport.http.HTTPSender;
 import org.apache.axis.transport.http.HTTPTransport;
+import org.apache.axis.utils.ClassUtils;
+import org.apache.axis.utils.Messages;
+import org.apache.axis.utils.XMLUtils;
+import org.apache.commons.logging.Log;
 
 /**
  * <p>
@@ -24,84 +33,145 @@ import org.apache.axis.transport.http.HTTPTransport;
  */
 public class SSLClientAxisEngineConfig extends SimpleProvider {
 
-	/**
-	 * Protocol
-	 */
-	private String protocol = null;
+	protected static Log log = LogFactory
+			.getLog(SSLClientAxisEngineConfig.class.getName());
+
+	protected static final String CLIENT_CONFIG_FILE = "client-config.wsdd";
+
+	private String proxyHost;
+	private String proxyPort;
+	private String proxyUser;
+	private String proxyPassword;
+
+	private String protocol;
+	private String algorithm;
+
+	private String keystore;
+	private String keystoreType;
+	private String keystorePassword;
+
+	private String truststore;
+	private String truststorePassword;
+	private String truststoreType;
+
+	private Hashtable options;
 
 	/**
-	 * Algorithm
-	 */
-	private String algorithm = null;
-
-	/**
-	 * Keystore filename
-	 */
-	private String keystore = null;
-
-	/**
-	 * Keystore type
-	 */
-	private String keystoreType = null;
-
-	/**
-	 * Keystore password
-	 */
-	private String keystorePassword = null;
-
-	/**
-	 * Truststore filename
-	 */
-	private String truststore = null;
-
-	/**
-	 * Truststore password
-	 */
-	private String truststorePassword = null;
-
-	/**
-	 * Truststore Type
-	 */
-	private String truststoreType = null;
-
-	/**
-	 * true to disable XML formatting
-	 */
-	private boolean disablePrettyXML = true;
-
-	/**
-	 * true to enable namespace prefix optimization (see Axis docs)
-	 */
-	private boolean enableNamespacePrefixOptimization = false;
-
-	/**
-	 * Constructor
+	 *
 	 */
 	public SSLClientAxisEngineConfig() {
 		super();
+		loadOptions(CLIENT_CONFIG_FILE);
 	}
 
 	/**
-	 * @param engineConfiguration
+	 * @param configFile
 	 */
-	public SSLClientAxisEngineConfig(EngineConfiguration engineConfiguration) {
-		super(engineConfiguration);
+	public SSLClientAxisEngineConfig(String configFile) {
+		super();
+		loadOptions(configFile);
 	}
 
-	/**
-	 * @param typeMappingRegistry
-	 */
-	public SSLClientAxisEngineConfig(TypeMappingRegistry typeMappingRegistry) {
-		super(typeMappingRegistry);
-	}
-
-	/**
-	 * @see org.apache.axis.configuration.SimpleProvider#configureEngine(org.apache.axis.AxisEngine)
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see
+	 * org.apache.axis.configuration.SimpleProvider#configureEngine(org.apache
+	 * .axis.AxisEngine)
 	 */
 	public void configureEngine(AxisEngine engine)
 			throws ConfigurationException {
 		super.configureEngine(engine);
+		initializeAxisProperties();
+		initializeGlobalOptions(engine);
+		initializeTransport();
+	}
+
+	private void initializeAxisProperties() {
+		AxisProperties.setProperty("axis.socketSecureFactory",
+				"org.apache.axis.components.net.CertificateSecureSocketFactory");
+		AxisProperties.setProperty("https.proxyHost", proxyHost);
+		AxisProperties.setProperty("https.proxyPort", proxyPort);
+		AxisProperties.setProperty("https.proxyUser", proxyUser);
+		AxisProperties.setProperty("https.proxyPassword", proxyPassword);
+	}
+
+	private void initializeGlobalOptions(AxisEngine engine)
+			throws ConfigurationException {
+		setGlobalOptions(getOptions());
 		engine.refreshGlobalOptions();
+	}
+
+	private void initializeTransport() throws ConfigurationException {
+		QName http = new QName(null, HTTPTransport.DEFAULT_TRANSPORT_NAME);
+		Handler transport = getTransport(http);
+
+		if (transport == null) {
+			Handler pivot = (Handler) new HTTPSender();
+			if (protocol != null) {
+				pivot.setOption("protocol", protocol);
+			}
+			if (algorithm != null) {
+				pivot.setOption("algorithm", algorithm);
+			}
+
+			if (keystore != null) {
+				pivot.setOption("clientauth", "true");
+				pivot.setOption("keystore", keystore);
+				if (keystoreType != null)
+					pivot.setOption("keystoreType", keystoreType);
+				if (keystorePassword != null) {
+					pivot.setOption("keystorePassword", keystorePassword);
+				}
+			}
+			if (truststore != null) {
+				pivot.setOption("truststore", truststore);
+				if (truststoreType != null)
+					pivot.setOption("truststoreType", truststoreType);
+				if (truststorePassword != null)
+					pivot.setOption("truststorePassword", truststorePassword);
+			}
+
+			transport = new SimpleTargetedChain(pivot);
+			deployTransport(http, transport);
+		}
+	}
+
+	/**
+	 * @param configFile
+	 * @throws ExceptionInInitializerError
+	 */
+	private void loadOptions(String configFile)
+			throws ExceptionInInitializerError {
+		InputStream input = null;
+		try {
+			try {
+				input = new FileInputStream(configFile);
+			} catch (Exception e) {
+				input = ClassUtils.getResourceAsStream(getClass(), configFile,
+						true);
+			}
+
+			if (input == null) {
+				throw new ConfigurationException(Messages
+						.getMessage("noConfigFile"));
+			}
+
+			WSDDDocument doc = new WSDDDocument(XMLUtils.newDocument(input));
+			if (doc.getDeployment().getGlobalConfiguration() != null) {
+				options = doc.getDeployment().getGlobalOptions();
+			}
+		} catch (Exception e) {
+			throw new ExceptionInInitializerError(e);
+		} finally {
+			if (input != null) {
+				try {
+					input.close();
+				} catch (IOException e) {
+					log.warn(e);
+				}
+			}
+		}
 	}
 
 	/**
@@ -169,74 +239,43 @@ public class SSLClientAxisEngineConfig extends SimpleProvider {
 	}
 
 	/**
-	 * <p>
-	 * Initialize
-	 * </p>
+	 * @param proxyHost
+	 *            the proxyHost to set
 	 */
-	public void initialize() {
-		AxisProperties
-				.setProperty("axis.socketSecureFactory",
-						"org.apache.axis.components.net.CertificateSecureSocketFactory");
-		AxisProperties.setProperty("axis.socketFactory",
-				"org.apache.axis.components.net.DefaultSocketFactory");
-
-		Hashtable opts = new Hashtable();
-		opts.put(AxisEngine.PROP_DISABLE_PRETTY_XML, new Boolean(
-				disablePrettyXML));
-		opts.put(AxisEngine.PROP_ENABLE_NAMESPACE_PREFIX_OPTIMIZATION,
-				new Boolean(enableNamespacePrefixOptimization));
-		setGlobalOptions(opts);
-
-		Handler pivot = (Handler) new HTTPSender();
-		if (protocol != null) {
-			pivot.setOption("protocol", protocol);
-		}
-		if (algorithm != null) {
-			pivot.setOption("algorithm", algorithm);
-		}
-
-		if (keystore != null) {
-			pivot.setOption("clientauth", "true");
-			pivot.setOption("keystore", keystore);
-			if (keystoreType != null)
-				pivot.setOption("keystoreType", keystoreType);
-			if (keystorePassword != null) {
-				pivot.setOption("keystorePassword", keystorePassword);
-			}
-		}
-		if (truststore != null) {
-			pivot.setOption("truststore", truststore);
-			if (truststoreType != null)
-				pivot.setOption("truststoreType", truststoreType);
-			if (truststorePassword != null)
-				pivot.setOption("truststorePassword", truststorePassword);
-		}
-
-		Handler transport = null;
-		transport = new SimpleTargetedChain(pivot);
-		deployTransport(HTTPTransport.DEFAULT_TRANSPORT_NAME, transport);
+	public void setProxyHost(String proxyHost) {
+		this.proxyHost = proxyHost;
 	}
 
 	/**
-	 * @return the disablePrettyXML
+	 * @param proxyPort
+	 *            the proxyPort to set
 	 */
-	public boolean isDisablePrettyXML() {
-		return disablePrettyXML;
+	public void setProxyPort(String proxyPort) {
+		this.proxyPort = proxyPort;
+	}
+
+	/**
+	 * @param proxyUser
+	 *            the proxyUser to set
+	 */
+	public void setProxyUser(String proxyUser) {
+		this.proxyUser = proxyUser;
+	}
+
+	/**
+	 * @param proxyPassword
+	 *            the proxyPassword to set
+	 */
+	public void setProxyPassword(String proxyPassword) {
+		this.proxyPassword = proxyPassword;
 	}
 
 	/**
 	 * @param disablePrettyXML
 	 *            the disablePrettyXML to set
 	 */
-	public void setDisablePrettyXML(boolean disablePrettyXML) {
-		this.disablePrettyXML = disablePrettyXML;
-	}
-
-	/**
-	 * @return the enableNamespacePrefixOptimization
-	 */
-	public boolean isEnableNamespacePrefixOptimization() {
-		return enableNamespacePrefixOptimization;
+	public void setDisablePrettyXML(Boolean disablePrettyXML) {
+		getOptions().put(AxisEngine.PROP_DISABLE_PRETTY_XML, disablePrettyXML);
 	}
 
 	/**
@@ -244,7 +283,34 @@ public class SSLClientAxisEngineConfig extends SimpleProvider {
 	 *            the enableNamespacePrefixOptimization to set
 	 */
 	public void setEnableNamespacePrefixOptimization(
-			boolean enableNamespacePrefixOptimization) {
-		this.enableNamespacePrefixOptimization = enableNamespacePrefixOptimization;
+			Boolean enableNamespacePrefixOptimization) {
+		getOptions().put(AxisEngine.PROP_ENABLE_NAMESPACE_PREFIX_OPTIMIZATION,
+				enableNamespacePrefixOptimization);
+	}
+
+	/**
+	 * @param sendMultiRefs
+	 *            the sendMultiRefs to set
+	 */
+	public void setSendMultiRefs(Boolean sendMultiRefs) {
+		getOptions().put(AxisEngine.PROP_DOMULTIREFS, sendMultiRefs);
+	}
+
+	/**
+	 * @param key
+	 * @param value
+	 */
+	public void setOption(String key, Object value) {
+		getOptions().put(key, value);
+	}
+
+	/**
+	 * @return
+	 */
+	public Hashtable getOptions() {
+		if (options == null) {
+			options = new Hashtable();
+		}
+		return options;
 	}
 }
