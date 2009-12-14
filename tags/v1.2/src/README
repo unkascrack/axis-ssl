@@ -1,0 +1,18 @@
+#Uso de la libreria axis-ssl-1.4
+
+// create config
+SSLClientAxisEngineConfig axisConfig = new SSLClientAxisEngineConfig();
+axisConfig.setProtocol("SSL") 						//default TLS
+axisConfig.setKeystore("/path/to/clientkey.p12");
+axisConfig.setKeystoreType("PKCS12");
+axisConfig.setKeystorePassword("changeit");
+axisConfig.setTruststore("/path/to/truststore.jks");
+axisConfig.setTruststoreType("JKS");
+axisConfig.setTruststorePassword("changeit");
+
+// initialize service
+URL soapURL = new URL("https://myserver.com/myapp/services/mywebserviceport");
+MyWebServiceServiceLocator locator = new MyServiceLocator(axisConfig);
+MyWebServicePort port = locator.getMyWebServicePort(soapURL);
+MyWebServiceBindingStub stub = (MyWebServiceBindingStub) port;
+MyResultType result = stub.myoperation1(...);
