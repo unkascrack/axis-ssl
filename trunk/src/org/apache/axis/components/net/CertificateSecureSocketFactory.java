@@ -133,10 +133,10 @@ public class CertificateSecureSocketFactory extends JSSESocketFactory implements
 	 * @throws IOException
 	 */
 	private TrustManager[] getTrustManagers() throws IOException {
-		String trustoreFile = (String) attributes.get("truststore");
+		String truststoreFile = (String) attributes.get("truststore");
 		try {
 			TrustManager trustManagers[] = null;
-			if (trustoreFile != null) {
+			if (truststoreFile != null) {
 				String truststorePass = (String) attributes
 						.get("truststorePassword");
 				String truststoreType = (String) attributes
@@ -149,7 +149,7 @@ public class CertificateSecureSocketFactory extends JSSESocketFactory implements
 					algorithm = TrustManagerFactory.getDefaultAlgorithm();
 				}
 
-				KeyStore trustStore = initKeyStore(trustoreFile,
+				KeyStore trustStore = initKeyStore(truststoreFile,
 						truststorePass, truststoreType);
 				TrustManagerFactory tmf = TrustManagerFactory
 						.getInstance(algorithm);
@@ -159,7 +159,7 @@ public class CertificateSecureSocketFactory extends JSSESocketFactory implements
 			return trustManagers;
 		} catch (Exception e) {
 			throw new IOException("Exception trying to load trustStore "
-					+ trustoreFile + ": " + e.getMessage());
+					+ truststoreFile + ": " + e.getMessage());
 		}
 	}
 
