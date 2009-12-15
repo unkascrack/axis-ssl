@@ -47,13 +47,13 @@ public class SSLClientAxisEngineConfig extends SimpleProvider {
 	private String protocol;
 	private String algorithm;
 
-	private String keystore;
-	private String keystoreType;
-	private String keystorePassword;
+	private String keyStore;
+	private String keyStoreType;
+	private String keyStorePassword;
 
-	private String truststore;
-	private String truststorePassword;
-	private String truststoreType;
+	private String trustStore;
+	private String trustStorePassword;
+	private String trustStoreType;
 
 	private Hashtable options;
 
@@ -117,21 +117,21 @@ public class SSLClientAxisEngineConfig extends SimpleProvider {
 				pivot.setOption("algorithm", algorithm);
 			}
 
-			if (keystore != null) {
+			if (keyStore != null) {
 				pivot.setOption("clientauth", "true");
-				pivot.setOption("keystore", keystore);
-				if (keystoreType != null)
-					pivot.setOption("keystoreType", keystoreType);
-				if (keystorePassword != null) {
-					pivot.setOption("keystorePassword", keystorePassword);
+				pivot.setOption("keyStore", keyStore);
+				if (keyStoreType != null)
+					pivot.setOption("keyStoreType", keyStoreType);
+				if (keyStorePassword != null) {
+					pivot.setOption("keyStorePassword", keyStorePassword);
 				}
 			}
-			if (truststore != null) {
-				pivot.setOption("truststore", truststore);
-				if (truststoreType != null)
-					pivot.setOption("truststoreType", truststoreType);
-				if (truststorePassword != null)
-					pivot.setOption("truststorePassword", truststorePassword);
+			if (trustStore != null) {
+				pivot.setOption("trustStore", trustStore);
+				if (trustStoreType != null)
+					pivot.setOption("trustStoreType", trustStoreType);
+				if (trustStorePassword != null)
+					pivot.setOption("trustStorePassword", trustStorePassword);
 			}
 
 			transport = new SimpleTargetedChain(pivot);
@@ -193,51 +193,51 @@ public class SSLClientAxisEngineConfig extends SimpleProvider {
 	}
 
 	/**
-	 * @param keystore
-	 *            the keystore to set
+	 * @param keyStore
+	 *            the keyStore to set
 	 */
-	public void setKeystore(String keystore) {
-		this.keystore = keystore;
+	public void setKeyStore(String keyStore) {
+		this.keyStore = keyStore;
 	}
 
 	/**
-	 * @param keystorePassword
-	 *            the keystorePassword to set
+	 * @param keyStorePassword
+	 *            the keyStorePassword to set
 	 */
-	public void setKeystorePassword(String keystorePassword) {
-		this.keystorePassword = keystorePassword;
+	public void setKeyStorePassword(String keyStorePassword) {
+		this.keyStorePassword = keyStorePassword;
 	}
 
 	/**
-	 * @param keystoreType
-	 *            the keystoreType to set
+	 * @param keyStoreType
+	 *            the keyStoreType to set
 	 */
-	public void setKeystoreType(String keystoreType) {
-		this.keystoreType = keystoreType;
+	public void setKeyStoreType(String keyStoreType) {
+		this.keyStoreType = keyStoreType;
 	}
 
 	/**
-	 * @param truststore
-	 *            the truststore to set
+	 * @param trustStore
+	 *            the trustStore to set
 	 */
-	public void setTruststore(String truststore) {
-		this.truststore = truststore;
+	public void setTrustStore(String trustStore) {
+		this.trustStore = trustStore;
 	}
 
 	/**
-	 * @param truststorePassword
-	 *            the truststorePassword to set
+	 * @param trustStorePassword
+	 *            the trustStorePassword to set
 	 */
-	public void setTruststorePassword(String truststorePassword) {
-		this.truststorePassword = truststorePassword;
+	public void setTrustStorePassword(String trustStorePassword) {
+		this.trustStorePassword = trustStorePassword;
 	}
 
 	/**
-	 * @param truststoreType
-	 *            the truststoreType to set
+	 * @param trustStoreType
+	 *            the trustStoreType to set
 	 */
-	public void setTruststoreType(String truststoreType) {
-		this.truststoreType = truststoreType;
+	public void setTrustStoreType(String trustStoreType) {
+		this.trustStoreType = trustStoreType;
 	}
 
 	/**
