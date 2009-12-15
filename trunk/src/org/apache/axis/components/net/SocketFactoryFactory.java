@@ -87,8 +87,8 @@ public class SocketFactoryFactory {
 		log.debug("Getting socketfactory for protocol: " + protocol);
 
 		if (PROTOCOL_HTTPS.equalsIgnoreCase(protocol)) {
-			atribute = PROTOCOL_HTTPS + "||" + attributes.get("keystore")
-					+ "||" + (String) attributes.get("truststore");
+			atribute = PROTOCOL_HTTPS + "||" + attributes.get("keyStore")
+					+ "||" + (String) attributes.get("trustStore");
 		} else if (PROTOCOL_HTTP.equalsIgnoreCase(protocol)) {
 			atribute = PROTOCOL_HTTP;
 		} else {

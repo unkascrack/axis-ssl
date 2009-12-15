@@ -34,7 +34,7 @@ public class CertificateSecureSocketFactory extends JSSESocketFactory implements
 	}
 
 	/**
-	 * Read the keystore, init the SSL socket factory
+	 * Read the keyStore, init the SSL socket factory
 	 *
 	 * This overrides the parent class to provide our SocketFactory
 	 * implementation.
@@ -59,7 +59,7 @@ public class CertificateSecureSocketFactory extends JSSESocketFactory implements
 	 * Gets a custom SSL Context. This is the main working of this class. The
 	 * following are the steps that make up our custom configuration:
 	 *
-	 * 1. Open our keystore file using the password provided
+	 * 1. Open our keyStore file using the password provided
 	 *
 	 * 2. Create a KeyManagerFactory and TrustManagerFactory using this file
 	 *
@@ -71,7 +71,9 @@ public class CertificateSecureSocketFactory extends JSSESocketFactory implements
 	 */
 	protected SSLContext getContext() throws IOException {
 		try {
-			if (attributes == null || (attributes.get("keystore") == null && attributes.get("truststore") == null)) {
+			if (attributes == null
+					|| (attributes.get("keyStore") == null && attributes
+							.get("trustStore") == null)) {
 				SSLContext context = SSLContext.getInstance(DEFAULT_PROTOCOL);
 				context.init(null, null, null);
 				return context;
@@ -99,32 +101,32 @@ public class CertificateSecureSocketFactory extends JSSESocketFactory implements
 	 * @throws IOException
 	 */
 	private KeyManager[] getKeyManagers() throws IOException {
-		String keystoreFile = (String) attributes.get("keystore");
+		String keyStoreFile = (String) attributes.get("keyStore");
 		try {
 			KeyManager[] keyManagers = null;
-			if (keystoreFile != null) {
-				String keystorePass = (String) attributes
-						.get("keystorePassword");
-				String keystoreType = (String) attributes.get("keystoreType");
-				if (keystoreType == null) {
-					keystoreType = KeyStore.getDefaultType();
+			if (keyStoreFile != null) {
+				String keyStorePass = (String) attributes
+						.get("keyStorePassword");
+				String keyStoreType = (String) attributes.get("keyStoreType");
+				if (keyStoreType == null) {
+					keyStoreType = KeyStore.getDefaultType();
 				}
 				String algorithm = getAlgorithm();
 				if (algorithm == null) {
 					algorithm = KeyManagerFactory.getDefaultAlgorithm();
 				}
 
-				KeyStore keyStore = initKeyStore(keystoreFile, keystorePass,
-						keystoreType);
+				KeyStore keyStore = initKeyStore(keyStoreFile, keyStorePass,
+						keyStoreType);
 				KeyManagerFactory kmf = KeyManagerFactory
 						.getInstance(algorithm);
-				kmf.init(keyStore, keystorePass.toCharArray());
+				kmf.init(keyStore, keyStorePass.toCharArray());
 				keyManagers = kmf.getKeyManagers();
 			}
 			return keyManagers;
 		} catch (Exception e) {
 			throw new IOException("Exception trying to load keyStore "
-					+ keystoreFile + ": " + e.getMessage());
+					+ keyStoreFile + ": " + e.getMessage());
 		}
 	}
 
@@ -133,24 +135,24 @@ public class CertificateSecureSocketFactory extends JSSESocketFactory implements
 	 * @throws IOException
 	 */
 	private TrustManager[] getTrustManagers() throws IOException {
-		String truststoreFile = (String) attributes.get("truststore");
+		String trustStoreFile = (String) attributes.get("trustStore");
 		try {
 			TrustManager trustManagers[] = null;
-			if (truststoreFile != null) {
-				String truststorePass = (String) attributes
-						.get("truststorePassword");
-				String truststoreType = (String) attributes
-						.get("truststoreType");
-				if (truststoreType == null) {
-					truststoreType = KeyStore.getDefaultType();
+			if (trustStoreFile != null) {
+				String trustStorePass = (String) attributes
+						.get("trustStorePassword");
+				String trustStoreType = (String) attributes
+						.get("trustStoreType");
+				if (trustStoreType == null) {
+					trustStoreType = KeyStore.getDefaultType();
 				}
 				String algorithm = getAlgorithm();
 				if (algorithm == null) {
 					algorithm = TrustManagerFactory.getDefaultAlgorithm();
 				}
 
-				KeyStore trustStore = initKeyStore(truststoreFile,
-						truststorePass, truststoreType);
+				KeyStore trustStore = initKeyStore(trustStoreFile,
+						trustStorePass, trustStoreType);
 				TrustManagerFactory tmf = TrustManagerFactory
 						.getInstance(algorithm);
 				tmf.init(trustStore);
@@ -159,7 +161,7 @@ public class CertificateSecureSocketFactory extends JSSESocketFactory implements
 			return trustManagers;
 		} catch (Exception e) {
 			throw new IOException("Exception trying to load trustStore "
-					+ truststoreFile + ": " + e.getMessage());
+					+ trustStoreFile + ": " + e.getMessage());
 		}
 	}
 
@@ -182,26 +184,26 @@ public class CertificateSecureSocketFactory extends JSSESocketFactory implements
 	}
 
 	/**
-	 * intializes a keystore.
+	 * intializes a keyStore.
 	 *
 	 * @param keyFile
 	 * @param keyPassword
-	 * @return keystore
+	 * @return keyStore
 	 * @throws IOException
 	 */
 	protected KeyStore initKeyStore(String keyFile, String keyPassword,
 			String keyType) throws IOException {
 		try {
-			KeyStore kstore = KeyStore.getInstance(keyType);
+			KeyStore kStore = KeyStore.getInstance(keyType);
 			InputStream istream = new FileInputStream(keyFile);
-			kstore.load(istream, keyPassword.toCharArray());
-			return kstore;
+			kStore.load(istream, keyPassword.toCharArray());
+			return kStore;
 		} catch (FileNotFoundException fnfe) {
 			throw fnfe;
 		} catch (IOException ioe) {
 			throw ioe;
 		} catch (Exception ex) {
-			throw new IOException("Exception trying to load keystore "
+			throw new IOException("Exception trying to load keyStore "
 					+ keyFile + ": " + ex.getMessage());
 		}
 	}
