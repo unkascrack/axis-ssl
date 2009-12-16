@@ -100,7 +100,7 @@ public class SocketFactoryFactory {
 		if (theFactory == null) {
 			Object objects[] = new Object[] { attributes };
 
-			log.debug("New socketfactory created for protocol: " + protocol);
+			log.debug("New socketfactory created for factory: " + atribute);
 
 			if (PROTOCOL_HTTPS.equalsIgnoreCase(protocol)) {
 				theFactory = (SecureSocketFactory) AxisProperties.newInstance(

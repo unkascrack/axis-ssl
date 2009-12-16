@@ -19,12 +19,19 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
+import org.apache.axis.components.logger.LogFactory;
+import org.apache.commons.logging.Log;
+
 /**
  * @author carlos.alonso1
  *
  */
 public class CertificateSecureSocketFactory extends JSSESocketFactory implements
 		SecureSocketFactory {
+
+	/** Field log **/
+	protected static Log log = LogFactory
+			.getLog(CertificateSecureSocketFactory.class.getName());
 
 	/**
 	 * @param attributes
@@ -43,6 +50,8 @@ public class CertificateSecureSocketFactory extends JSSESocketFactory implements
 	 */
 	protected void initFactory() throws IOException {
 		try {
+			log.info("Enter::CertificateSecureSocketFactory::init");
+
 			SSLContext context = getContext();
 			sslFactory = context.getSocketFactory();
 		} catch (Exception e) {
@@ -80,7 +89,6 @@ public class CertificateSecureSocketFactory extends JSSESocketFactory implements
 			}
 
 			String protocol = getProtocol();
-
 			KeyManager[] keyManagers = getKeyManagers();
 			TrustManager trustManagers[] = getTrustManagers();
 
@@ -194,6 +202,11 @@ public class CertificateSecureSocketFactory extends JSSESocketFactory implements
 	protected KeyStore initKeyStore(String keyFile, String keyPassword,
 			String keyType) throws IOException {
 		try {
+			if (log.isDebugEnabled()) {
+				log.debug("CertificateSecureSocketFactory::init key store::"
+						+ keyFile + "::" + keyPassword + "::" + keyType);
+			}
+
 			KeyStore kStore = KeyStore.getInstance(keyType);
 			InputStream istream = new FileInputStream(keyFile);
 			kStore.load(istream, keyPassword.toCharArray());
