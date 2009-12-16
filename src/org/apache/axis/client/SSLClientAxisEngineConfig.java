@@ -89,6 +89,7 @@ public class SSLClientAxisEngineConfig extends SimpleProvider {
 	}
 
 	private void initializeAxisProperties() {
+		log.debug("SSLClientAxisEngineConfig::AxisProperties::init");
 		AxisProperties
 				.setProperty("axis.socketSecureFactory",
 						"org.apache.axis.components.net.CertificateSecureSocketFactory");
@@ -102,6 +103,10 @@ public class SSLClientAxisEngineConfig extends SimpleProvider {
 			throws ConfigurationException {
 		setGlobalOptions(getOptions());
 		engine.refreshGlobalOptions();
+
+		if (log.isDebugEnabled()) {
+			log.debug("Global options: "+getGlobalOptions());
+		}
 	}
 
 	private void initializeTransport() throws ConfigurationException {
@@ -109,6 +114,8 @@ public class SSLClientAxisEngineConfig extends SimpleProvider {
 		Handler transport = getTransport(http);
 
 		if (transport == null) {
+			log.debug("SSLClientAxisEngineConfig::Transport::init");
+
 			Handler pivot = (Handler) new HTTPSender();
 			if (protocol != null) {
 				pivot.setOption("protocol", protocol);
@@ -145,6 +152,9 @@ public class SSLClientAxisEngineConfig extends SimpleProvider {
 	 */
 	private void loadOptions(String configFile)
 			throws ExceptionInInitializerError {
+
+		log.info("Enter::SSLClientAxisEngineConfig::init::"+configFile);
+
 		InputStream input = null;
 		try {
 			try {
