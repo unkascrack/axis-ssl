@@ -20,6 +20,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
 import org.apache.axis.components.logger.LogFactory;
+import org.apache.axis.util.ResourceResolver;
 import org.apache.commons.logging.Log;
 
 /**
@@ -208,7 +209,7 @@ public class CertificateSecureSocketFactory extends JSSESocketFactory implements
 			}
 
 			KeyStore kStore = KeyStore.getInstance(keyType);
-			InputStream istream = new FileInputStream(keyFile);
+			InputStream istream = ResourceResolver.getInputStream(keyFile);
 			kStore.load(istream, keyPassword.toCharArray());
 			return kStore;
 		} catch (FileNotFoundException fnfe) {
